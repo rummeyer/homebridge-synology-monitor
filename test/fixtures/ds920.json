@@ -1,0 +1,171 @@
+{
+  "_comment": "Answers recorded from a DS920+ on DSM 7.4.1, trimmed to the fields the plugin reads; serial numbers replaced.",
+  "info": {
+    "codepage": "ger",
+    "model": "DS920+",
+    "ram": 8192,
+    "serial": "0000TEST0001",
+    "temperature": 42,
+    "temperature_warn": false,
+    "time": "Sat Oct 24 22:18:08 2026",
+    "uptime": 131,
+    "version": "90080",
+    "version_string": "DSM 7.4.1-90080 Update 1"
+  },
+  "utilization": {
+    "cpu": {
+      "15min_load": 202,
+      "1min_load": 719,
+      "5min_load": 499,
+      "device": "System",
+      "other_load": 8,
+      "system_load": 1,
+      "user_load": 3
+    },
+    "memory": {
+      "avail_real": 5518492,
+      "avail_swap": 6885292,
+      "buffer": 25292,
+      "cached": 1240352,
+      "device": "Memory",
+      "memory_size": 8388608,
+      "real_usage": 14,
+      "si_disk": 0,
+      "so_disk": 0,
+      "swap_usage": 0,
+      "total_real": 7979132,
+      "total_swap": 6885292
+    }
+  },
+  "storage": {
+    "volumes": [
+      {
+        "id": "volume_1",
+        "num_id": 1,
+        "vol_desc": "",
+        "status": "normal",
+        "size": {
+          "free_inode": "0",
+          "total": "30712206524416",
+          "total_device": "31991881793536",
+          "total_inode": "0",
+          "used": "13408377262080"
+        },
+        "fs_type": "btrfs"
+      }
+    ],
+    "storagePools": [
+      {
+        "id": "reuse_1",
+        "num_id": 1,
+        "status": "normal",
+        "device_type": "shr_with_2_disk_protect"
+      }
+    ],
+    "disks": [
+      {
+        "id": "sata1",
+        "name": "Drive 3",
+        "longName": "Drive 3",
+        "temp": 29,
+        "status": "normal",
+        "smart_status": "normal",
+        "overview_status": "normal",
+        "model": "ST16000VN001-2RV103",
+        "remain_life": {
+          "trustable": true,
+          "value": -1
+        },
+        "below_remain_life_thr": false
+      },
+      {
+        "id": "sata2",
+        "name": "Drive 4",
+        "longName": "Drive 4",
+        "temp": 28,
+        "status": "normal",
+        "smart_status": "normal",
+        "overview_status": "normal",
+        "model": "ST16000NT001-3LV101",
+        "remain_life": {
+          "trustable": true,
+          "value": -1
+        },
+        "below_remain_life_thr": false
+      },
+      {
+        "id": "sata3",
+        "name": "Drive 1",
+        "longName": "Drive 1",
+        "temp": 28,
+        "status": "normal",
+        "smart_status": "normal",
+        "overview_status": "normal",
+        "model": "ST16000VN001-2RV103",
+        "remain_life": {
+          "trustable": true,
+          "value": -1
+        },
+        "below_remain_life_thr": false
+      },
+      {
+        "id": "sata4",
+        "name": "Drive 2",
+        "longName": "Drive 2",
+        "temp": 28,
+        "status": "normal",
+        "smart_status": "normal",
+        "overview_status": "normal",
+        "model": "ST16000VN001-2RV103",
+        "remain_life": {
+          "trustable": true,
+          "value": -1
+        },
+        "below_remain_life_thr": false
+      },
+      {
+        "id": "nvme0n1",
+        "name": "Cache device 2",
+        "longName": "Cache device 2",
+        "temp": 36,
+        "status": "normal",
+        "smart_status": "normal",
+        "overview_status": "normal",
+        "model": "Samsung SSD 970 EVO Plus 500GB",
+        "remain_life": {
+          "trustable": true,
+          "value": 95
+        },
+        "below_remain_life_thr": false
+      },
+      {
+        "id": "nvme1n1",
+        "name": "Cache device 1",
+        "longName": "Cache device 1",
+        "temp": 38,
+        "status": "normal",
+        "smart_status": "normal",
+        "overview_status": "normal",
+        "model": "Samsung SSD 970 EVO Plus 500GB",
+        "remain_life": {
+          "trustable": true,
+          "value": 95
+        },
+        "below_remain_life_thr": false
+      }
+    ]
+  },
+  "status": {
+    "ext_nic_is_incompatible": false,
+    "is_system_crashed": false,
+    "upgrade_ready": false
+  },
+  "upgrade": {
+    "available": false
+  },
+  "upgradeV2": {
+    "update": {
+      "available": false
+    }
+  }
+}

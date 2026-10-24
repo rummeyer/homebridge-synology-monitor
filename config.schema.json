@@ -1,0 +1,198 @@
+{
+  "pluginAlias": "SynologyMonitor",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "Powers a Synology NAS on and off from HomeKit — Wake-on-LAN to turn it on, DSM to shut it down — and shows its temperature, CPU and memory load, storage health, how full its volumes are, its drives' temperatures and waiting DSM updates. Uses the DSM Web API with an administrator account without 2-step verification. Run it as a child bridge.",
+  "footerDisplay": "For Wake-on-LAN, enable it on the NAS under Control Panel → Hardware & Power → General.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "Synology Monitor",
+        "description": "Only the log prefix."
+      },
+      "nas": {
+        "title": "NAS",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "host", "username", "password"],
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "placeholder": "Diskstation",
+              "description": "The accessory's name in HomeKit. The NAS is remembered by it, so renaming it adds it to HomeKit anew."
+            },
+            "host": {
+              "title": "Host",
+              "type": "string",
+              "placeholder": "192.168.1.20",
+              "description": "The NAS's IP address or name on the home network."
+            },
+            "protocol": {
+              "title": "Protocol",
+              "type": "string",
+              "default": "https",
+              "oneOf": [
+                { "title": "HTTPS", "enum": ["https"] },
+                { "title": "HTTP", "enum": ["http"] }
+              ]
+            },
+            "port": {
+              "title": "Port",
+              "type": "integer",
+              "placeholder": 5001,
+              "minimum": 1,
+              "maximum": 65535,
+              "description": "DSM's port: 5001 for HTTPS and 5000 for HTTP unless changed under Control Panel → Login Portal."
+            },
+            "checkCertificate": {
+              "title": "Check the certificate",
+              "type": "boolean",
+              "default": false,
+              "description": "Only with a certificate valid for this host name. DSM's own is self-signed, which this would refuse."
+            },
+            "username": {
+              "title": "Username",
+              "type": "string",
+              "description": "A DSM account in the administrators group, without 2-step verification — shutting down and restarting need one. Best a separate account just for this."
+            },
+            "password": {
+              "title": "Password",
+              "type": "string",
+              "x-schema-form": { "type": "password" }
+            },
+            "mac": {
+              "title": "MAC address",
+              "type": "string",
+              "placeholder": "00:11:32:aa:bb:cc",
+              "description": "For Wake-on-LAN. Without it the Power switch can shut the NAS down but not turn it on."
+            },
+            "broadcast": {
+              "title": "Broadcast address",
+              "type": "string",
+              "placeholder": "255.255.255.255",
+              "description": "Where the Wake-on-LAN packet is sent. The network's own, such as 10.0.1.255, if the default does not reach the NAS."
+            },
+            "startupSeconds": {
+              "title": "Startup time (s)",
+              "type": "integer",
+              "placeholder": 180,
+              "minimum": 0,
+              "maximum": 900,
+              "description": "How long the Power switch stays on after waking the NAS before DSM must answer."
+            },
+            "shutdownSeconds": {
+              "title": "Shutdown time (s)",
+              "type": "integer",
+              "placeholder": 120,
+              "minimum": 0,
+              "maximum": 900,
+              "description": "How long the Power switch stays off after a shutdown while DSM still answers."
+            },
+            "sensors": {
+              "title": "Accessories",
+              "type": "object",
+              "properties": {
+                "temperature": { "title": "Temperature — the system temperature", "type": "boolean", "default": true },
+                "cpu": { "title": "CPU — a fan whose speed is the CPU load", "type": "boolean", "default": true },
+                "memory": { "title": "Memory — a fan whose speed is the memory in use", "type": "boolean", "default": true },
+                "storage": { "title": "Storage — a leak sensor that goes off when a volume, pool or drive is in trouble", "type": "boolean", "default": true },
+                "update": { "title": "DSM Update — an occupancy sensor, occupied while an update is waiting", "type": "boolean", "default": true },
+                "restart": { "title": "Restart — a switch that restarts the NAS", "type": "boolean", "default": true },
+                "disks": { "title": "A temperature sensor per drive", "type": "boolean", "default": true },
+                "volumes": { "title": "A humidity sensor per volume, showing how full it is", "type": "boolean", "default": true }
+              }
+            }
+          }
+        }
+      },
+      "pollSeconds": {
+        "title": "Poll every (s)",
+        "type": "integer",
+        "placeholder": 30,
+        "minimum": 10,
+        "maximum": 3600,
+        "description": "How often the plugin asks each NAS whether it is on and what it reads."
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "type": "boolean",
+        "default": false,
+        "description": "A web page of its own with every NAS, and buttons to power on, shut down and restart. Without a login: keep it on the home network."
+      },
+      "dashboardPort": {
+        "title": "Dashboard port",
+        "type": "integer",
+        "placeholder": 8583,
+        "minimum": 1,
+        "maximum": 65535,
+        "condition": { "functionBody": "return model.dashboard === true;" }
+      },
+      "dashboardControls": {
+        "title": "Buttons on the dashboard",
+        "type": "boolean",
+        "default": true,
+        "description": "Power on, Shut down and Restart. They answer only devices on the home network. Off makes the page read only.",
+        "condition": { "functionBody": "return model.dashboard === true;" }
+      }
+    }
+  },
+  "layout": [
+    "name",
+    {
+      "key": "nas",
+      "type": "array",
+      "title": "NAS",
+      "buttonText": "Add a NAS",
+      "items": [
+        "nas[].name",
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": ["nas[].host", "nas[].protocol", "nas[].port"]
+        },
+        "nas[].checkCertificate",
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": ["nas[].username", "nas[].password"]
+        },
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": ["nas[].mac", "nas[].broadcast"]
+        },
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": ["nas[].startupSeconds", "nas[].shutdownSeconds"]
+        },
+        {
+          "type": "fieldset",
+          "title": "Accessories",
+          "expandable": true,
+          "items": [
+            "nas[].sensors.temperature",
+            "nas[].sensors.cpu",
+            "nas[].sensors.memory",
+            "nas[].sensors.storage",
+            "nas[].sensors.update",
+            "nas[].sensors.restart",
+            "nas[].sensors.disks",
+            "nas[].sensors.volumes"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fieldset",
+      "title": "General",
+      "expandable": true,
+      "items": ["pollSeconds", "dashboard", "dashboardPort", "dashboardControls"]
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+<!doctype html>
+<!--
+  The dashboard the plugin serves itself, see dashboard.ts: whether each NAS
+  is on, what it reads, and buttons to wake it, shut it down or restart it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Synology Monitor</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- After the icon, which it changes for the Home look. -->
+  <script src="theme.js"></script>
+  <style>
+    /* Light, and the dark palette beside it, used where the system asks for
+       it unless the viewer chose light, and where the viewer chose dark; see theme.js. */
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f5f7; --card: #fff; --text: #1d2229; --muted: #6b7380; --line: rgba(128,128,128,.2);
+      --run: #2e9e5b; --run-bg: rgba(46,158,91,.12); --off: #b0b6bf; --warn: #c9822a; --bad: #d64545; --accent: #2f80ed;
+      --dark-bg: #15181c; --dark-card: #1f2329; --dark-text: #e6e8eb; --dark-muted: #949ba6; --dark-line: rgba(160,160,160,.18);
+      --dark-run: #4cc27e; --dark-run-bg: rgba(76,194,126,.14); --dark-off: #5b626c;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: var(--dark-bg); --card: var(--dark-card); --text: var(--dark-text); --muted: var(--dark-muted); --line: var(--dark-line);
+        --run: var(--dark-run); --run-bg: var(--dark-run-bg); --off: var(--dark-off);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: var(--dark-bg); --card: var(--dark-card); --text: var(--dark-text); --muted: var(--dark-muted); --line: var(--dark-line);
+      --run: var(--dark-run); --run-bg: var(--dark-run-bg); --off: var(--dark-off);
+    }
+    :root[data-theme="light"] { color-scheme: light; }
+    :root[data-theme="dark"] { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    @media (min-width: 561px) {
+      html { zoom: .8; }
+    }
+    body { margin: 0; background: var(--bg); color: var(--text);
+           font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; min-height: 88px; }
+    h1 { font-size: 1.5rem; margin: 0; display: flex; align-items: center; gap: 14px; }
+    h1 img { width: 88px; height: 88px; border-radius: 18px; }
+    h1 .version { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
+    h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 28px 0 10px; }
+    h2 .about { text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 8px; }
+    .muted { color: var(--muted); font-size: .85rem; }
+    .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); grid-auto-rows: 1fr; gap: 12px; }
+    .tile { display: flex; flex-direction: column; justify-content: flex-start; padding: 14px 16px; border: 2px solid transparent; }
+    .tile .icon { display: none; }
+    .tile .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tile .value { font-size: 1.9rem; font-weight: 600; font-variant-numeric: tabular-nums; margin: 4px 0 6px; }
+    .tile .value small { font-size: .55em; font-weight: 500; color: var(--muted); margin-left: 2px; }
+    .tile.idle .value, .tile.stale .value { color: var(--muted); }
+    .state { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--muted); }
+    .state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--off); flex: none; }
+    .running .state { color: var(--run); font-weight: 600; }
+    .running .state::before { background: var(--run); }
+    .busy .state { color: var(--warn); font-weight: 600; }
+    .busy .state::before { background: var(--warn); }
+    .trouble .state { color: var(--bad); font-weight: 600; }
+    .trouble .state::before { background: var(--bad); }
+    .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 8px; }
+    .bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+    .detail { font-size: .78rem; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .actions button { font: inherit; font-weight: 600; padding: 9px 18px; border-radius: 10px; border: 1px solid var(--line);
+                      background: var(--card); color: var(--text); cursor: pointer; }
+    .actions button:hover:not(:disabled) { border-color: var(--accent); }
+    .actions button:disabled { opacity: .45; cursor: default; }
+    .actions button.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
+    .message { font-size: .85rem; margin-top: 8px; min-height: 1.2em; }
+    .message.error { color: var(--bad); }
+    .problems { margin: 10px 0 0; padding: 10px 14px; color: var(--bad); font-weight: 500; }
+    .problems li { margin-left: 18px; }
+
+    .side { display: flex; align-items: center; gap: 14px; }
+    .theme-switch { display: none; }
+    [data-theme-pref] .theme-switch { display: inline-flex; background: none; border: 0; padding: 4px; margin: -4px;
+                                      cursor: pointer; color: var(--muted); line-height: 0; }
+    .theme-switch:hover { color: var(--text); }
+    .theme-icon { display: none; }
+    [data-theme-pref="light"] .theme-icon-light,
+    [data-theme-pref="dark"] .theme-icon-dark,
+    [data-theme-pref="home"] .theme-icon-home { display: block; }
+    .title-home { display: none; }
+
+    /* The Home look, as appliance-monitor's: grey glass tiles on a warm,
+       blurred landscape, icons in dark circles, white tiles for what is on. */
+    :root[data-theme="home"] {
+      color-scheme: dark;
+      --bg: #6b5338; --card: rgba(58,50,42,.46); --text: #fff; --muted: rgba(255,255,255,.62); --line: rgba(255,255,255,.16);
+      --run: #fff; --run-bg: rgba(255,255,255,.18); --off: rgba(255,255,255,.4); --warn: #ffb340; --bad: #ff6961; --accent: #f9cf3d;
+      --home: #f9cf3d;
+    }
+    [data-theme="home"] body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(70% 45% at 75% 22%, rgba(226,223,215,.6) 0%, rgba(226,223,215,0) 70%),
+        radial-gradient(60% 40% at 20% 62%, rgba(190,140,70,.75) 0%, rgba(190,140,70,0) 70%),
+        radial-gradient(55% 40% at 80% 70%, rgba(205,150,80,.6) 0%, rgba(205,150,80,0) 70%),
+        linear-gradient(180deg, #a9a399 0%, #bdb5a4 24%, #a8885c 48%, #7a5a37 66%, #4f3b26 84%, #3a2c1d 100%);
+    }
+    [data-theme="home"] body { background: var(--bg); position: relative; z-index: 0; }
+    [data-theme="home"] h1 { font-size: 2.1rem; font-weight: 700; letter-spacing: -.01em; text-shadow: 0 1px 8px rgba(0,0,0,.18); }
+    [data-theme="home"] h1 img, [data-theme="home"] h1 .version, [data-theme="home"] h1 .title { display: none; }
+    [data-theme="home"] h1 .title-home { display: inline; }
+    [data-theme="home"] #updated { color: rgba(255,255,255,.9); text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+    [data-theme="home"] .theme-switch { color: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,.35)); }
+    [data-theme="home"] h2 { text-transform: none; letter-spacing: 0; font-size: 1.3rem; font-weight: 700; color: var(--text);
+                             margin: 30px 0 10px 4px; text-shadow: 0 1px 8px rgba(0,0,0,.2); }
+    [data-theme="home"] h2 .about { font-size: .85rem; font-weight: 500; color: rgba(255,255,255,.85); }
+    [data-theme="home"] .card { border-radius: 22px; box-shadow: none;
+                                -webkit-backdrop-filter: blur(28px) saturate(150%); backdrop-filter: blur(28px) saturate(150%); }
+    [data-theme="home"] .tile { aspect-ratio: 1; padding: 14px; overflow: hidden; border-radius: 20px; }
+    [data-theme="home"] .tile > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    [data-theme="home"] .tile .icon { display: flex; align-items: center; justify-content: center; flex: none;
+                                      width: 42px; height: 42px; border-radius: 50%; margin-bottom: auto;
+                                      background: rgba(0,0,0,.28); color: var(--home); }
+    [data-theme="home"] .tile .name { font-size: 1rem; font-weight: 700; margin-top: 8px; }
+    [data-theme="home"] .tile .value { font-size: 1.35rem; margin: 0; }
+    [data-theme="home"] .tile .value small { color: inherit; opacity: .7; }
+    [data-theme="home"] .tile .state { font-size: .84rem; font-weight: 500; }
+    [data-theme="home"] .tile .state::before { display: none; }
+    [data-theme="home"] .tile .bar { flex: none; background: rgba(255,255,255,.18); }
+    [data-theme="home"] .tile .bar span { background: var(--home); }
+    [data-theme="home"] .tile.running { background: rgba(255,255,255,.95); color: #1c1c1e; }
+    [data-theme="home"] .tile.running .icon { background: var(--home); color: #fff; }
+    [data-theme="home"] .tile.running .state, [data-theme="home"] .tile.running .detail,
+    [data-theme="home"] .tile.running .value small { color: #6e6e73; }
+    [data-theme="home"] .tile.trouble .icon { color: var(--bad); }
+    [data-theme="home"] .actions button { background: rgba(255,255,255,.16); border-color: transparent; border-radius: 14px;
+                                          -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+    [data-theme="home"] .actions button:hover:not(:disabled) { border-color: rgba(255,255,255,.5); }
+    [data-theme="home"] .actions button.armed { background: #ff453a; }
+    [data-theme="home"] .message { text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+    [data-theme="home"] .problems { color: #fff; background: rgba(255,69,58,.55); }
+    @media (max-width: 560px) {
+      .tiles, [data-theme="home"] .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      [data-theme="home"] .tile { aspect-ratio: auto; padding: 12px; border-radius: 18px; }
+      [data-theme="home"] h1 { font-size: 1.8rem; }
+      [data-theme="home"] .tile .icon { width: 38px; height: 38px; }
+      [data-theme="home"] .tile .name { margin-top: 14px; }
+    }
+  </style>
+  <script src="dashboard.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1><img src="icon.png" alt=""><span><span class="title">Synology Monitor</span><span class="title-home" data-text="home">Home</span><small class="version" id="version"></small></span></h1>
+      <div class="side">
+        <span class="muted" id="updated"></span>
+        <button type="button" class="theme-switch" data-theme-switch>
+          <!-- sun -->
+          <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.55 1.55M17.15 17.15l1.55 1.55M5.3 18.7l1.55-1.55M17.15 6.85l1.55-1.55"/></svg>
+          <!-- moon -->
+          <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z"/></svg>
+          <!-- houses in a house, as the Home app's icon: the Home look -->
+          <svg class="theme-icon theme-icon-home" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 10.6 12 4l8 6.6v8.2a1.2 1.2 0 0 1-1.2 1.2H5.2A1.2 1.2 0 0 1 4 18.8z"/><path d="M7.4 12.6 12 8.8l4.6 3.8V20H7.4z"/><path d="M10.2 14.6 12 13.1l1.8 1.5V20h-3.6z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div id="nas"></div>
+  </main>
+</body>
+</html>

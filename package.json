@@ -1,0 +1,69 @@
+{
+  "name": "homebridge-synology-monitor",
+  "displayName": "Synology Monitor",
+  "version": "1.0.0",
+  "description": "Homebridge plugin for a Synology NAS: power it on and off, and see its temperature, CPU and memory load, storage health and DSM updates in HomeKit — with a dashboard of its own",
+  "license": "MIT",
+  "author": "Oliver Rummeyer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rummeyer/homebridge-synology-monitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rummeyer/homebridge-synology-monitor/issues"
+  },
+  "homepage": "https://github.com/rummeyer/homebridge-synology-monitor#readme",
+  "main": "dist/index.js",
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.0.0 || ^26.0.0",
+    "homebridge": "^2.0.0"
+  },
+  "files": [
+    "dist",
+    "web",
+    "config.schema.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "npm run build && node --test test/*.test.ts",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run clean && npm test"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "supports-hap",
+    "synology",
+    "diskstation",
+    "nas",
+    "dsm",
+    "wake-on-lan",
+    "temperature",
+    "homekit"
+  ],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/rummeyer"
+    },
+    {
+      "type": "paypal",
+      "url": "https://paypal.me/rummeyer"
+    },
+    {
+      "type": "buymeacoffee",
+      "url": "https://buymeacoffee.com/rummeyer"
+    }
+  ],
+  "devDependencies": {
+    "@homebridge/hap-nodejs": "^2.2.3",
+    "@types/node": "^22.20.4",
+    "homebridge": "^2.4.0",
+    "typescript": "^5.9.3"
+  }
+}
