@@ -1,94 +1,26 @@
 <!--
-  The plugin's settings page: the form from config.schema.json, drawn here
-  rather than by Homebridge so that the link to the dashboard can stand in
-  it, under the Dashboard switch in General, as Appliance Monitor has it.
+  Settings page shown inside the Homebridge UI, as Appliance Monitor's.
 
-  The form is Homebridge's own, made with createForm from the schema and its
-  layout; only the link is added. What is typed goes back to Homebridge as
-  it is typed, and is saved with the settings window's Save button.
+  Runs in an iframe the host provides; `homebridge.*` is injected by it. The
+  host supplies Bootstrap and the active theme, so styling stays minimal.
+
+  The settings are this page's own form (settings.js): one NAS at a time,
+  picked from a list, and General with the link to the dashboard under its
+  switch. Homebridge's generated form is kept hidden.
 -->
+<script src="settings.js"></script>
+
+<div class="card mb-3">
+  <div class="card-body" id="sm-settings"></div>
+</div>
+
 <script>
   (async () => {
-    'use strict';
-
-    /** As DEFAULTS.dashboardPort in src/config.ts; a test keeps the two the same. */
-    const DEFAULT_DASHBOARD_PORT = 8583;
-    /** How long after the last change to Dashboard or its port the link is redrawn. */
-    const REDRAW_MS = 1200;
-
-    const schema = await homebridge.getPluginConfigSchema();
+    homebridge.hideSchemaForm();
+    const style = document.createElement('style');
+    style.textContent = window.SynologySettings.css;
+    document.head.append(style);
     const address = await homebridge.request('/address').catch(() => null);
-    const host = address || window.location.hostname;
-    const [saved] = await homebridge.getPluginConfig();
-    let config = saved ?? { platform: schema.pluginAlias, name: 'Synology Monitor', nas: [] };
-
-    /** The dashboard's address, while it is switched on. */
-    function link(settings) {
-      if (settings.dashboard !== true || !host) {
-        return null;
-      }
-      const port = Number.isInteger(settings.dashboardPort) && settings.dashboardPort >= 1 && settings.dashboardPort <= 65535
-        ? settings.dashboardPort
-        : DEFAULT_DASHBOARD_PORT;
-      return `http://${host}:${port}/`;
-    }
-
-    /** The layout with the link under the Dashboard switch, beside its port, as a help line. */
-    function layout(settings) {
-      const url = link(settings);
-      const items = structuredClone(schema.layout);
-      const general = items.find((item) => item && item.title === 'General');
-      const row = general.items.find((item) => item && item.type === 'flex' && JSON.stringify(item).includes('"dashboard"'));
-      const column = row.items.find((item) => item && Array.isArray(item.items) && item.items.includes('dashboard'));
-      if (url) {
-        column.items.push({
-          type: 'help',
-          helpvalue: `<p class="help-block"><a href="${url}" target="_blank" rel="noopener">${url}</a></p>`,
-        });
-      }
-      return items;
-    }
-
-    /** A NAS row the form added and nobody filled in: no name, no host, no username. */
-    const blank = (nas) => !nas || !['name', 'host', 'username'].some((key) => typeof nas[key] === 'string' && nas[key].trim());
-
-    /**
-     * What the form says, with what it does not show — platform, child
-     * bridge — kept, and without blank NAS rows, which the form adds and
-     * which would otherwise be saved.
-     */
-    function merged(change) {
-      const shown = new Set(Object.keys(schema.schema.properties));
-      const kept = Object.fromEntries(Object.entries(config).filter(([key]) => !shown.has(key)));
-      const next = { ...kept, ...change };
-      if (Array.isArray(next.nas)) {
-        next.nas = next.nas.filter((nas) => !blank(nas));
-      }
-      return next;
-    }
-
-    let form;
-    let drawnFor;
-    let timer;
-
-    function draw() {
-      drawnFor = link(config);
-      form?.end();
-      form = homebridge.createForm({ schema: schema.schema, layout: layout(config) }, config);
-      form.onChange((change) => {
-        config = merged(change);
-        homebridge.updatePluginConfig([config]);
-        // Redrawn a moment after the last change, so typing a port is not interrupted.
-        clearTimeout(timer);
-        if (link(config) !== drawnFor) {
-          timer = setTimeout(draw, REDRAW_MS);
-        }
-      });
-    }
-
-    // Blank rows saved by an earlier version are dropped as the page opens.
-    config = merged(config);
-    homebridge.updatePluginConfig([config]);
-    draw();
+    await window.SynologySettings.mount(document.getElementById('sm-settings'), { homebridge, address });
   })();
 </script>

@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 import { DEFAULT_SENSORS, DEFAULTS, MIN_POLL_SECONDS } from '../src/config.ts';
 import { PLATFORM_NAME } from '../src/settings.ts';
@@ -74,17 +75,24 @@ test('the password field hides what is typed, set in the layout, which both form
   assert.equal(nas.password['x-schema-form'], undefined);
 });
 
-test('the settings page is the custom one, which shows the link to the dashboard', () => {
+test('the settings page is its own form, as Appliance Monitor\'s, with Homebridge\'s hidden', () => {
   assert.equal(schema.customUi, true);
   assert.equal(schema.customUiPath, './homebridge-ui');
   const page = readFileSync(new URL('../homebridge-ui/public/index.html', import.meta.url), 'utf8');
-  assert.match(page, new RegExp(`DEFAULT_DASHBOARD_PORT = ${DEFAULTS.dashboardPort};`));
-  assert.match(page, /homebridge\.createForm\(/, "Homebridge's form, drawn by the page");
+  assert.match(page, /homebridge\.hideSchemaForm\(\)/);
+  assert.match(page, /SynologySettings\.mount\(/);
 });
 
-test('the General section is there with the Dashboard switch, where the page puts the link', () => {
-  const general = schema.layout.find((item: any) => item && item.title === 'General');
-  assert.ok(general, 'the page looks for a fieldset titled General');
-  const row = general.items.find((item: any) => item?.type === 'flex' && JSON.stringify(item).includes('"dashboard"'));
-  assert.ok(row.items.some((item: any) => Array.isArray(item?.items) && item.items.includes('dashboard')));
+test("the settings page's defaults and accessories are the plugin's", () => {
+  const window: Record<string, any> = {};
+  runInNewContext(readFileSync(new URL('../homebridge-ui/public/settings.js', import.meta.url), 'utf8'), { window });
+  const { DEFAULTS: page, SENSORS } = window.SynologySettings;
+  assert.equal(page.port, DEFAULTS.port);
+  assert.equal(page.httpPort, 5000);
+  assert.equal(page.broadcast, DEFAULTS.broadcast);
+  assert.equal(page.startupSeconds, DEFAULTS.startupSeconds);
+  assert.equal(page.shutdownSeconds, DEFAULTS.shutdownSeconds);
+  assert.equal(page.pollSeconds, DEFAULTS.pollSeconds);
+  assert.equal(page.dashboardPort, DEFAULTS.dashboardPort);
+  assert.deepEqual(Array.from(SENSORS, ([key]: [string]) => key), Object.keys(DEFAULT_SENSORS));
 });

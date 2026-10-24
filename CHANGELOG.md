@@ -6,6 +6,21 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-10-24
+
+### Changed
+
+- The settings page is a form of its own, as Appliance Monitor's: one NAS
+  at a time, picked from a list with Add and Delete, its account, power and
+  accessories below, and General with the link to the dashboard under its
+  switch and the port beside it. Only what differs from the default is
+  saved. Homebridge's generated form is hidden.
+
+### Fixed
+
+- Since 1.1.1 the settings showed almost none of the saved values: the form
+  the page drew did not take them. Nothing saved was lost.
+
 ## [1.1.2] — 2026-10-24
 
 ### Fixed
