@@ -102,8 +102,7 @@ needs a second press within four seconds, so a stray tap does nothing.
 
 It opens in the **Home** look, after Apple's Home app — glass tiles on a
 wallpaper, white for what is on — and the button at the top right switches to
-**light** and **dark**. It is in **English**, or in **German** where the
-browser is. It updates itself every five seconds.
+**light** and **dark**. It updates itself every five seconds.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/rummeyer/homebridge-synology-monitor/main/docs/dashboard-phone.png" alt="The dashboard on a phone: two tiles side by side" width="300">
@@ -241,8 +240,8 @@ its bridge in the Home app; automations that used its switch need the new
 **Power** switch.
 
 **[nas-control](https://github.com/rummeyer/nas-control):** the dashboard does
-what it did — wake, shut down, status, English and German, buttons for the
-home network only — inside Homebridge, with the readings beside it. Its
+what it did — wake, shut down, status, buttons for the home network only —
+inside Homebridge, with the readings beside it. Its
 `nas.url`, `nas.user`, `nas.pass` and `nas.mac` are `protocol` / `host` /
 `port`, `username`, `password` and `mac` here.
 

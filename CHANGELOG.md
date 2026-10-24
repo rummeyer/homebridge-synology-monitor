@@ -6,6 +6,13 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-10-24
+
+### Changed
+
+- The dashboard is in English only, whatever the browser's language.
+- The dashboard's tab in the Home look is called *Home (Synology Monitor)*.
+
 ## [1.2.0] — 2026-10-24
 
 ### Changed

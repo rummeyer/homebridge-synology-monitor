@@ -3,7 +3,6 @@
  * and draws a section per NAS — tiles for power, temperature, CPU, memory,
  * storage, each volume, the DSM update and each drive, and the buttons.
  *
- * In English or German, after the browser's language, as nas-control is.
  * Everything the plugin sends is put in as text, never as HTML.
  */
 (function () {
@@ -13,33 +12,17 @@
   /** How long a pressed button waits for the second press that confirms it. */
   const ARM_MS = 4000;
 
-  const TEXTS = {
-    en: {
-      home: 'Home', power: 'Power', on: 'On', off: 'Off', starting: 'Starting…', stopping: 'Shutting down…', restarting: 'Restarting…',
-      temperature: 'Temperature', cpu: 'CPU', memory: 'Memory', storage: 'Storage', healthy: 'Healthy', trouble: 'Needs attention',
-      update: 'DSM Update', available: 'Available', upToDate: 'Up to date', used: 'used', of: 'of', warm: 'Too warm', fine: 'Normal',
-      load: 'Load', inUse: 'In use', wake: 'Power on', shutdown: 'Shut down', restart: 'Restart',
-      confirmWake: 'Really power on?', confirmShutdown: 'Really shut down?', confirmRestart: 'Really restart?',
-      sentWake: 'Wake-on-LAN sent.', sentShutdown: 'Shutting down.', sentRestart: 'Restarting.',
-      up: 'up', noMac: 'No MAC address set, so it cannot be woken.', unreachable: 'The plugin cannot be reached.',
-      updated: 'Updated', lastKnown: 'Last known', noReadings: 'No readings yet', unknown: '–', noNas: 'No NAS set up yet.',
-      days: 'd', hours: 'h', minutes: 'min',
-    },
-    de: {
-      home: 'Zuhause', power: 'Strom', on: 'Ein', off: 'Aus', starting: 'Startet…', stopping: 'Fährt herunter…', restarting: 'Startet neu…',
-      temperature: 'Temperatur', cpu: 'CPU', memory: 'Arbeitsspeicher', storage: 'Speicher', healthy: 'In Ordnung', trouble: 'Braucht Aufmerksamkeit',
-      update: 'DSM-Update', available: 'Verfügbar', upToDate: 'Aktuell', used: 'belegt', of: 'von', warm: 'Zu warm', fine: 'Normal',
-      load: 'Auslastung', inUse: 'Belegt', wake: 'Einschalten', shutdown: 'Herunterfahren', restart: 'Neu starten',
-      confirmWake: 'Wirklich einschalten?', confirmShutdown: 'Wirklich herunterfahren?', confirmRestart: 'Wirklich neu starten?',
-      sentWake: 'Wake-on-LAN gesendet.', sentShutdown: 'Fährt herunter.', sentRestart: 'Startet neu.',
-      up: 'läuft seit', noMac: 'Keine MAC-Adresse eingestellt, daher kann sie nicht eingeschaltet werden.', unreachable: 'Das Plugin ist nicht erreichbar.',
-      updated: 'Aktualisiert', lastKnown: 'Zuletzt bekannt', noReadings: 'Noch keine Werte', unknown: '–', noNas: 'Noch keine NAS eingerichtet.',
-      days: 'T', hours: 'Std', minutes: 'Min',
-    },
+  const T = {
+    home: 'Home', power: 'Power', on: 'On', off: 'Off', starting: 'Starting…', stopping: 'Shutting down…', restarting: 'Restarting…',
+    temperature: 'Temperature', cpu: 'CPU', memory: 'Memory', storage: 'Storage', healthy: 'Healthy', trouble: 'Needs attention',
+    update: 'DSM Update', available: 'Available', upToDate: 'Up to date', used: 'used', of: 'of', warm: 'Too warm', fine: 'Normal',
+    load: 'Load', inUse: 'In use', wake: 'Power on', shutdown: 'Shut down', restart: 'Restart',
+    confirmWake: 'Really power on?', confirmShutdown: 'Really shut down?', confirmRestart: 'Really restart?',
+    sentWake: 'Wake-on-LAN sent.', sentShutdown: 'Shutting down.', sentRestart: 'Restarting.',
+    up: 'up', noMac: 'No MAC address set, so it cannot be woken.', unreachable: 'The plugin cannot be reached.',
+    updated: 'Updated', lastKnown: 'Last known', noReadings: 'No readings yet', unknown: '–', noNas: 'No NAS set up yet.',
+    days: 'd', hours: 'h', minutes: 'min',
   };
-  const LANGUAGE = (navigator.language || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
-  const T = TEXTS[LANGUAGE];
-  document.documentElement.lang = LANGUAGE;
 
   const ICONS = {
     power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
@@ -145,7 +128,7 @@
       const trouble = r.problems.length > 0;
       tiles.append(tile({
         iconName: 'storage', name: T.storage, value: trouble ? '!' : '✓', state: trouble ? T.trouble : T.healthy,
-        kind: trouble ? 'trouble' : stale, detail: `${r.disks.length} × ${LANGUAGE === 'de' ? 'Laufwerk' : 'drive'}`,
+        kind: trouble ? 'trouble' : stale, detail: `${r.disks.length} drive${r.disks.length === 1 ? '' : 's'}`,
       }));
       for (const volume of r.volumes) {
         tiles.append(tile({
@@ -241,7 +224,7 @@
     try {
       const response = await fetch('state', { cache: 'no-store' });
       last = await response.json();
-      document.getElementById('updated').textContent = `${T.updated} ${new Date().toLocaleTimeString(LANGUAGE, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+      document.getElementById('updated').textContent = `${T.updated} ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
     } catch {
       document.getElementById('updated').textContent = T.unreachable;
     }
