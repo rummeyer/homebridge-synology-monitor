@@ -4,6 +4,8 @@
   "singular": true,
   "headerDisplay": "Powers a Synology NAS on and off from HomeKit — Wake-on-LAN to turn it on, DSM to shut it down — and shows its temperature, CPU and memory load, storage health, how full its volumes are, its drives' temperatures and waiting DSM updates. Uses the DSM Web API with an administrator account without 2-step verification. Run it as a child bridge.",
   "footerDisplay": "For Wake-on-LAN, enable it on the NAS under Control Panel → Hardware & Power → General.",
+  "customUi": true,
+  "customUiPath": "./homebridge-ui",
   "schema": {
     "type": "object",
     "properties": {

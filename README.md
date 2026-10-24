@@ -131,7 +131,10 @@ On a phone the tiles are two side by side:
 <img src="https://raw.githubusercontent.com/rummeyer/homebridge-synology-monitor/main/docs/dashboard-phone.png" alt="The dashboard on a phone: two tiles side by side" width="300">
 
 Switch it on in the settings under *General* → **Dashboard**, restart the
-child bridge, and open `http://<your Homebridge machine>:8583/`.
+child bridge, and open `http://<your Homebridge machine>:8583/` — the
+plugin's settings page shows the link at the top while it is on. Any free
+port will do under **Dashboard port**; the Homebridge UI itself is usually
+on 8581.
 
 ### Who can press the buttons
 

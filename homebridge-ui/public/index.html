@@ -1,0 +1,51 @@
+<!--
+  The plugin's settings page: Homebridge's form from config.schema.json, and
+  above it the link to the dashboard while it is switched on, as Appliance
+  Monitor shows it.
+-->
+<style>
+  .sm-dashboard { margin: 0 0 1rem; font-size: .9rem; }
+  .sm-dashboard a { font-weight: 600; }
+  .sm-dashboard .sm-off { opacity: .7; }
+</style>
+
+<div class="sm-dashboard" id="dashboard"></div>
+
+<script>
+  (async () => {
+    'use strict';
+
+    /** As DEFAULTS.dashboardPort in src/config.ts; a test keeps the two the same. */
+    const DEFAULT_DASHBOARD_PORT = 8583;
+    const box = document.getElementById('dashboard');
+    const address = await homebridge.request('/address').catch(() => null);
+    const host = address || window.location.hostname;
+
+    function show(config) {
+      const port = Number.isInteger(config.dashboardPort) && config.dashboardPort >= 1 && config.dashboardPort <= 65535
+        ? config.dashboardPort
+        : DEFAULT_DASHBOARD_PORT;
+      box.replaceChildren();
+      if (config.dashboard === true && host) {
+        const url = `http://${host}:${port}/`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = url;
+        box.append('Dashboard: ', link);
+      } else {
+        const off = document.createElement('span');
+        off.className = 'sm-off';
+        off.textContent = 'The dashboard is off: tick Dashboard under General, save, and restart the child bridge.';
+        box.append(off);
+      }
+    }
+
+    const [config] = await homebridge.getPluginConfig();
+    show(config ?? {});
+    homebridge.showSchemaForm();
+    // The link follows the form as it is edited, before it is saved.
+    homebridge.addEventListener('configChanged', (event) => show((event.data && event.data[0]) || {}));
+  })();
+</script>

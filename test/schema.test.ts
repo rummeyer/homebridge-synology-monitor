@@ -67,3 +67,11 @@ test('every field is in the layout', () => {
 test('the password field hides what is typed', () => {
   assert.equal(nas.password['x-schema-form'].type, 'password');
 });
+
+test('the settings page is the custom one, which shows the link to the dashboard', () => {
+  assert.equal(schema.customUi, true);
+  assert.equal(schema.customUiPath, './homebridge-ui');
+  const page = readFileSync(new URL('../homebridge-ui/public/index.html', import.meta.url), 'utf8');
+  assert.match(page, new RegExp(`DEFAULT_DASHBOARD_PORT = ${DEFAULTS.dashboardPort};`));
+  assert.match(page, /homebridge\.showSchemaForm\(\)/, 'with the generated form below');
+});

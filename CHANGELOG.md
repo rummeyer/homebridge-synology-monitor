@@ -6,6 +6,13 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-10-24
+
+### Added
+
+- The settings page shows the link to the dashboard at the top while it is
+  switched on, as Appliance Monitor's does, with Homebridge's form below.
+
 ## [1.0.1] — 2026-10-24
 
 ### Changed
