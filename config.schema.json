@@ -18,7 +18,12 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["name", "host", "username", "password"],
+          "required": [
+            "name",
+            "host",
+            "username",
+            "password"
+          ],
           "properties": {
             "name": {
               "title": "Name",
@@ -37,17 +42,25 @@
               "type": "string",
               "default": "https",
               "oneOf": [
-                { "title": "HTTPS", "enum": ["https"] },
-                { "title": "HTTP", "enum": ["http"] }
+                {
+                  "title": "HTTPS",
+                  "enum": [
+                    "https"
+                  ]
+                },
+                {
+                  "title": "HTTP",
+                  "enum": [
+                    "http"
+                  ]
+                }
               ]
             },
             "port": {
               "title": "Port",
               "type": "integer",
-              "placeholder": 5001,
-              "minimum": 1,
-              "maximum": 65535,
-              "description": "DSM's port: 5001 for HTTPS and 5000 for HTTP unless changed under Control Panel → Login Portal."
+              "placeholder": "5001",
+              "description": "DSM's port, as under Control Panel → Login Portal; 5001 if empty, or 5000 for HTTP."
             },
             "checkCertificate": {
               "title": "Check the certificate",
@@ -63,7 +76,9 @@
             "password": {
               "title": "Password",
               "type": "string",
-              "x-schema-form": { "type": "password" }
+              "x-schema-form": {
+                "type": "password"
+              }
             },
             "mac": {
               "title": "MAC address",
@@ -80,31 +95,59 @@
             "startupSeconds": {
               "title": "Startup time (s)",
               "type": "integer",
-              "placeholder": 180,
-              "minimum": 0,
-              "maximum": 900,
-              "description": "How long the Power switch stays on after waking the NAS before DSM must answer."
+              "placeholder": "180",
+              "description": "How long the Power switch stays on after waking the NAS before DSM must answer; 180 if empty."
             },
             "shutdownSeconds": {
               "title": "Shutdown time (s)",
               "type": "integer",
-              "placeholder": 120,
-              "minimum": 0,
-              "maximum": 900,
-              "description": "How long the Power switch stays off after a shutdown while DSM still answers."
+              "placeholder": "120",
+              "description": "How long the Power switch stays off after a shutdown while DSM still answers; 120 if empty."
             },
             "sensors": {
               "title": "Accessories",
               "type": "object",
               "properties": {
-                "temperature": { "title": "Temperature — the system temperature", "type": "boolean", "default": true },
-                "cpu": { "title": "CPU — a fan whose speed is the CPU load", "type": "boolean", "default": true },
-                "memory": { "title": "Memory — a fan whose speed is the memory in use", "type": "boolean", "default": true },
-                "storage": { "title": "Storage — a leak sensor that goes off when a volume, pool or drive is in trouble", "type": "boolean", "default": true },
-                "update": { "title": "DSM Update — an occupancy sensor, occupied while an update is waiting", "type": "boolean", "default": true },
-                "restart": { "title": "Restart — a switch that restarts the NAS", "type": "boolean", "default": true },
-                "disks": { "title": "A temperature sensor per drive", "type": "boolean", "default": true },
-                "volumes": { "title": "A humidity sensor per volume, showing how full it is", "type": "boolean", "default": true }
+                "temperature": {
+                  "title": "Temperature — the system temperature",
+                  "type": "boolean",
+                  "default": true
+                },
+                "cpu": {
+                  "title": "CPU — a fan whose speed is the CPU load",
+                  "type": "boolean",
+                  "default": true
+                },
+                "memory": {
+                  "title": "Memory — a fan whose speed is the memory in use",
+                  "type": "boolean",
+                  "default": true
+                },
+                "storage": {
+                  "title": "Storage — a leak sensor that goes off when a volume, pool or drive is in trouble",
+                  "type": "boolean",
+                  "default": true
+                },
+                "update": {
+                  "title": "DSM Update — an occupancy sensor, occupied while an update is waiting",
+                  "type": "boolean",
+                  "default": true
+                },
+                "restart": {
+                  "title": "Restart — a switch that restarts the NAS",
+                  "type": "boolean",
+                  "default": true
+                },
+                "disks": {
+                  "title": "A temperature sensor per drive",
+                  "type": "boolean",
+                  "default": true
+                },
+                "volumes": {
+                  "title": "A humidity sensor per volume, showing how full it is",
+                  "type": "boolean",
+                  "default": true
+                }
               }
             }
           }
@@ -113,31 +156,26 @@
       "pollSeconds": {
         "title": "Poll every (s)",
         "type": "integer",
-        "placeholder": 30,
-        "minimum": 10,
-        "maximum": 3600,
-        "description": "How often the plugin asks each NAS whether it is on and what it reads."
+        "placeholder": "30",
+        "description": "How often the plugin asks each NAS whether it is on and what it reads; 30 if empty, at least 10."
       },
       "dashboard": {
         "title": "Dashboard",
         "type": "boolean",
         "default": false,
-        "description": "A web page of its own with every NAS, and buttons to power on, shut down and restart. Without a login: keep it on the home network."
+        "description": "A web page with each NAS — whether it is on, its temperature, load, storage and drives — and buttons to power it on, shut it down and restart it, at http://<this machine>:<port>/. No login: anyone on the network can see it."
       },
       "dashboardPort": {
         "title": "Dashboard port",
         "type": "integer",
-        "placeholder": 8583,
-        "minimum": 1,
-        "maximum": 65535,
-        "condition": { "functionBody": "return model.dashboard === true;" }
+        "placeholder": "8583",
+        "description": "The port of the dashboard; 8583 if empty."
       },
       "dashboardControls": {
         "title": "Buttons on the dashboard",
         "type": "boolean",
         "default": true,
-        "description": "Power on, Shut down and Restart. They answer only devices on the home network. Off makes the page read only.",
-        "condition": { "functionBody": "return model.dashboard === true;" }
+        "description": "Power on, Shut down and Restart; they answer only devices on the home network. Off makes the page read only."
       }
     }
   },
@@ -153,23 +191,36 @@
         {
           "type": "flex",
           "flex-flow": "row wrap",
-          "items": ["nas[].host", "nas[].protocol", "nas[].port"]
+          "items": [
+            "nas[].host",
+            "nas[].protocol",
+            "nas[].port"
+          ]
         },
         "nas[].checkCertificate",
         {
           "type": "flex",
           "flex-flow": "row wrap",
-          "items": ["nas[].username", "nas[].password"]
+          "items": [
+            "nas[].username",
+            "nas[].password"
+          ]
         },
         {
           "type": "flex",
           "flex-flow": "row wrap",
-          "items": ["nas[].mac", "nas[].broadcast"]
+          "items": [
+            "nas[].mac",
+            "nas[].broadcast"
+          ]
         },
         {
           "type": "flex",
           "flex-flow": "row wrap",
-          "items": ["nas[].startupSeconds", "nas[].shutdownSeconds"]
+          "items": [
+            "nas[].startupSeconds",
+            "nas[].shutdownSeconds"
+          ]
         },
         {
           "type": "fieldset",
@@ -192,7 +243,18 @@
       "type": "fieldset",
       "title": "General",
       "expandable": true,
-      "items": ["pollSeconds", "dashboard", "dashboardPort", "dashboardControls"]
+      "items": [
+        "pollSeconds",
+        {
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            "dashboard",
+            "dashboardPort"
+          ]
+        },
+        "dashboardControls"
+      ]
     }
   ]
 }

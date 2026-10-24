@@ -26,14 +26,29 @@ test('every accessory has a switch, with the default the code uses', () => {
   }
 });
 
-test('placeholders and limits match the code', () => {
-  assert.equal(nas.port.placeholder, DEFAULTS.port);
-  assert.equal(nas.startupSeconds.placeholder, DEFAULTS.startupSeconds);
-  assert.equal(nas.shutdownSeconds.placeholder, DEFAULTS.shutdownSeconds);
+test('placeholders match the code', () => {
+  assert.equal(nas.port.placeholder, String(DEFAULTS.port));
+  assert.equal(nas.startupSeconds.placeholder, String(DEFAULTS.startupSeconds));
+  assert.equal(nas.shutdownSeconds.placeholder, String(DEFAULTS.shutdownSeconds));
   assert.equal(nas.broadcast.placeholder, DEFAULTS.broadcast);
-  assert.equal(properties.pollSeconds.placeholder, DEFAULTS.pollSeconds);
-  assert.equal(properties.pollSeconds.minimum, MIN_POLL_SECONDS);
-  assert.equal(properties.dashboardPort.placeholder, DEFAULTS.dashboardPort);
+  assert.equal(properties.pollSeconds.placeholder, String(DEFAULTS.pollSeconds));
+  assert.match(properties.pollSeconds.description, new RegExp(`at least ${MIN_POLL_SECONDS}`));
+  assert.equal(properties.dashboardPort.placeholder, String(DEFAULTS.dashboardPort));
+});
+
+test('no number field is a slider: none has both a minimum and a maximum', () => {
+  const numbers = [...Object.entries(properties), ...Object.entries(nas)].filter(([, field]: [string, any]) => field.type === 'integer');
+  assert.ok(numbers.length >= 5);
+  for (const [key, field] of numbers as [string, any][]) {
+    assert.ok(!('minimum' in field && 'maximum' in field), key);
+  }
+});
+
+test('the dashboard settings are always shown, the port beside the switch, as in appliance-monitor', () => {
+  for (const key of ['dashboard', 'dashboardPort', 'dashboardControls']) {
+    assert.equal(properties[key].condition, undefined, key);
+  }
+  assert.ok(JSON.stringify(schema.layout).includes('"items":["dashboard","dashboardPort"]'));
 });
 
 test('every field is in the layout', () => {

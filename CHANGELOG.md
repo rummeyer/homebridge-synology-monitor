@@ -6,6 +6,14 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-10-24
+
+### Changed
+
+- The settings' number fields are plain fields, without a slider, and say
+  what an empty one means. The dashboard's switch and port sit side by side
+  and are always shown, as in Appliance Monitor.
+
 ## [1.0.0] — 2026-10-24
 
 ### Added

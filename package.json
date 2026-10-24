@@ -1,7 +1,7 @@
 {
   "name": "homebridge-synology-monitor",
   "displayName": "Synology Monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Homebridge plugin for a Synology NAS: power it on and off, and see its temperature, CPU and memory load, storage health and DSM updates in HomeKit — with a dashboard of its own",
   "license": "MIT",
   "author": "Oliver Rummeyer",
