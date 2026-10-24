@@ -12,6 +12,7 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 - The dashboard is in English only, whatever the browser's language.
 - The dashboard's tab in the Home look is called *Home (Synology Monitor)*.
+- A new icon: a four-bay NAS with a chart.
 
 ## [1.2.0] — 2026-10-24
 
