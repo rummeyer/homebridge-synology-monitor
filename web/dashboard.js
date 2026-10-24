@@ -188,7 +188,7 @@
     if (!last) {
       return;
     }
-    document.getElementById('version').textContent = last.version ? `v${last.version}` : '';
+    document.getElementById('version').textContent = last.version ? `Version ${last.version}` : '';
     root.replaceChildren(...(last.nas.length ? last.nas.map((nas, index) => section(nas, index, last.controls)) : [el('p', 'muted', T.noNas)]));
   }
 
