@@ -71,10 +71,7 @@
             },
             "password": {
               "title": "Password",
-              "type": "string",
-              "x-schema-form": {
-                "type": "password"
-              }
+              "type": "string"
             },
             "mac": {
               "title": "MAC address",
@@ -199,7 +196,10 @@
           "flex-flow": "row wrap",
           "items": [
             "nas[].username",
-            "nas[].password"
+            {
+              "key": "nas[].password",
+              "type": "password"
+            }
           ]
         },
         {

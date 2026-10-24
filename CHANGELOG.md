@@ -6,6 +6,13 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.2] — 2026-10-24
+
+### Fixed
+
+- The password showed as an empty field in the settings since 1.1.1; it
+  shows as dots again. It was never lost.
+
 ## [1.1.1] — 2026-10-24
 
 ### Changed

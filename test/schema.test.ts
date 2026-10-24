@@ -69,8 +69,9 @@ test('every field is in the layout', () => {
   }
 });
 
-test('the password field hides what is typed', () => {
-  assert.equal(nas.password['x-schema-form'].type, 'password');
+test('the password field hides what is typed, set in the layout, which both forms read', () => {
+  assert.ok(JSON.stringify(schema.layout).includes('{"key":"nas[].password","type":"password"}'));
+  assert.equal(nas.password['x-schema-form'], undefined);
 });
 
 test('the settings page is the custom one, which shows the link to the dashboard', () => {
