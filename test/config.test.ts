@@ -75,3 +75,11 @@ test('a platform without NAS is no error, only empty', () => {
     config: { name: 'Synology Monitor', nas: [], pollSeconds: 30, dashboard: false, dashboardPort: 8583, dashboardControls: true },
   });
 });
+
+test('a NAS row nobody filled in, as the settings form adds, is left out without a word', () => {
+  const blank = { protocol: 'https', checkCertificate: false, password: '', sensors: { cpu: true } };
+  const { config, problems } = readConfig({ platform: 'SynologyMonitor', nas: [minimal, blank, {}, null] });
+  assert.equal(config.nas.length, 1);
+  assert.deepEqual(problems, []);
+  assert.deepEqual(readConfig({ nas: [{ host: '192.168.1.20' }] }).problems, ['NAS 1: no username or password'], 'half filled in is still said');
+});

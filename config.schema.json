@@ -20,12 +20,6 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": [
-            "name",
-            "host",
-            "username",
-            "password"
-          ],
           "properties": {
             "name": {
               "title": "Name",
@@ -165,7 +159,7 @@
         "title": "Dashboard",
         "type": "boolean",
         "default": false,
-        "description": "A web page with each NAS — whether it is on, its temperature, load, storage and drives — and buttons to power it on, shut it down and restart it, at http://<this machine>:<port>/. No login: anyone on the network can see it."
+        "description": "A page with each NAS and its buttons, without login."
       },
       "dashboardPort": {
         "title": "Dashboard port",
@@ -251,8 +245,17 @@
           "type": "flex",
           "flex-flow": "row wrap",
           "items": [
-            "dashboard",
-            "dashboardPort"
+            {
+              "type": "section",
+              "flex": "1 1 50%",
+              "items": [
+                "dashboard"
+              ]
+            },
+            {
+              "key": "dashboardPort",
+              "flex": "1 1 50%"
+            }
           ]
         },
         "dashboardControls"

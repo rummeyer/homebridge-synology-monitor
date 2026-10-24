@@ -6,6 +6,21 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.1] — 2026-10-24
+
+### Changed
+
+- The link to the dashboard stands in the settings form itself, under the
+  Dashboard switch and its port in General, as in Appliance Monitor. The
+  form is drawn by the plugin's settings page from the same schema.
+
+### Fixed
+
+- The settings form added an empty NAS each time it was saved, and showed
+  them as errors; the plugin logged each as left out. Empty rows are no
+  longer saved, those saved before are dropped when the settings are
+  opened, and the plugin passes over any left without a word.
+
 ## [1.1.0] — 2026-10-24
 
 ### Added

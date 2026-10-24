@@ -48,7 +48,12 @@ test('the dashboard settings are always shown, the port beside the switch, as in
   for (const key of ['dashboard', 'dashboardPort', 'dashboardControls']) {
     assert.equal(properties[key].condition, undefined, key);
   }
-  assert.ok(JSON.stringify(schema.layout).includes('"items":["dashboard","dashboardPort"]'));
+  const general = schema.layout.find((item: any) => item && item.title === 'General');
+  const row = general.items.find((item: any) => item?.type === 'flex');
+  assert.deepEqual(row.items, [
+    { type: 'section', flex: '1 1 50%', items: ['dashboard'] },
+    { key: 'dashboardPort', flex: '1 1 50%' },
+  ]);
 });
 
 test('every field is in the layout', () => {
@@ -73,5 +78,12 @@ test('the settings page is the custom one, which shows the link to the dashboard
   assert.equal(schema.customUiPath, './homebridge-ui');
   const page = readFileSync(new URL('../homebridge-ui/public/index.html', import.meta.url), 'utf8');
   assert.match(page, new RegExp(`DEFAULT_DASHBOARD_PORT = ${DEFAULTS.dashboardPort};`));
-  assert.match(page, /homebridge\.showSchemaForm\(\)/, 'with the generated form below');
+  assert.match(page, /homebridge\.createForm\(/, "Homebridge's form, drawn by the page");
+});
+
+test('the General section is there with the Dashboard switch, where the page puts the link', () => {
+  const general = schema.layout.find((item: any) => item && item.title === 'General');
+  assert.ok(general, 'the page looks for a fieldset titled General');
+  const row = general.items.find((item: any) => item?.type === 'flex' && JSON.stringify(item).includes('"dashboard"'));
+  assert.ok(row.items.some((item: any) => Array.isArray(item?.items) && item.items.includes('dashboard')));
 });

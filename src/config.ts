@@ -151,12 +151,24 @@ export function readNas(raw: unknown, index: number): { nas?: NasConfig; problem
   };
 }
 
+/**
+ * A NAS row nobody filled in — no name, host or username — as the settings
+ * form adds one; left out without a word.
+ */
+export function isBlank(entry: unknown): boolean {
+  const fields = (entry && typeof entry === 'object' ? entry : {}) as Record<string, unknown>;
+  return !text(fields.name) && !text(fields.host) && !text(fields.username);
+}
+
 /** The platform's settings, and why any NAS among them was left out. */
 export function readConfig(raw: PlatformConfig | Record<string, unknown>): { config: PluginConfig; problems: string[] } {
   const entries = Array.isArray(raw.nas) ? raw.nas : [];
   const problems: string[] = [];
   const nas: NasConfig[] = [];
   entries.forEach((entry: unknown, index: number) => {
+    if (isBlank(entry)) {
+      return;
+    }
     const read = readNas(entry, index);
     problems.push(...read.problems);
     if (read.nas) {
