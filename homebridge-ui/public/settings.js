@@ -132,6 +132,12 @@
       }, 250);
     }
 
+    /** Sets or drops a key as setOrDrop does, and hands the change on. */
+    function put(object, key, value, fallback) {
+      setOrDrop(object, key, value, fallback);
+      changed();
+    }
+
     // ---- Building blocks ----------------------------------------------------
 
     function field(label, input, help, error) {
@@ -165,6 +171,11 @@
       return el('div', { class: 'form-check' },
         el('input', { class: 'form-check-input', type: 'checkbox', id, checked, onchange: (e) => onChange(e.target.checked) }),
         el('label', { class: 'form-check-label', for: id }, label));
+    }
+
+    /** A checkbox with a line of help under it, and anything more after that. */
+    function checkField(id, label, checked, onChange, help, ...more) {
+      return el('div', {}, check(id, label, checked, onChange), el('div', { class: 'sm-help' }, help), ...more);
     }
 
     function choice(value, options, onChange) {
@@ -244,10 +255,7 @@
         changed();
       });
       host.id = 'sm-host';
-      const port = number(nas.port, String(defaultPort()), (value) => {
-        setOrDrop(nas, 'port', wholeOrUndefined(value), defaultPort());
-        changed();
-      });
+      const port = number(nas.port, String(defaultPort()), (value) => put(nas, 'port', wholeOrUndefined(value), defaultPort()));
       const protocol = choice(nas.protocol === 'http' ? 'http' : 'https', [['https', 'HTTPS'], ['http', 'HTTP']], (value) => {
         setOrDrop(nas, 'protocol', value, 'https');
         port.placeholder = String(defaultPort());
@@ -270,16 +278,14 @@
       });
 
       const sensors = nas.sensors && typeof nas.sensors === 'object' ? nas.sensors : {};
-      const checks = SENSORS.map(([key, label, help]) => el('div', {},
-        check(`sm-sensor-${key}`, label, sensors[key] !== false, (on) => {
-          nas.sensors = { ...(nas.sensors ?? {}) };
-          setOrDrop(nas.sensors, key, on, true);
-          if (!Object.keys(nas.sensors).length) {
-            delete nas.sensors;
-          }
-          changed();
-        }),
-        el('div', { class: 'sm-help' }, help)));
+      const checks = SENSORS.map(([key, label, help]) => checkField(`sm-sensor-${key}`, label, sensors[key] !== false, (on) => {
+        nas.sensors = { ...(nas.sensors ?? {}) };
+        setOrDrop(nas.sensors, key, on, true);
+        if (!Object.keys(nas.sensors).length) {
+          delete nas.sensors;
+        }
+        changed();
+      }, help));
 
       return el('div', {},
         el('div', { class: 'sm-section' },
@@ -295,27 +301,15 @@
             field('Password', password),
             el('div', {},
               el('div', { class: 'form-label mb-1' }, ' '),
-              check('sm-certificate', 'Check the certificate', nas.checkCertificate === true, (on) => {
-                setOrDrop(nas, 'checkCertificate', on, false);
-                changed();
-              }),
+              check('sm-certificate', 'Check the certificate', nas.checkCertificate === true, (on) => put(nas, 'checkCertificate', on, false)),
               el('div', { class: 'sm-help' }, "Only with one valid for this host; DSM's own is self-signed.")))),
         el('div', { class: 'sm-section' },
           el('h6', {}, 'Power'),
           el('div', { class: 'sm-grid' },
             field('MAC address', mac, 'For Wake-on-LAN. Without it the NAS can be shut down but not woken.', macError(String(nas.mac ?? ''))),
-            field('Startup time (s)', number(nas.startupSeconds, String(DEFAULTS.startupSeconds), (value) => {
-              setOrDrop(nas, 'startupSeconds', wholeOrUndefined(value), DEFAULTS.startupSeconds);
-              changed();
-            }), 'How long Power stays on after a wake before DSM must answer.'),
-            field('Shutdown time (s)', number(nas.shutdownSeconds, String(DEFAULTS.shutdownSeconds), (value) => {
-              setOrDrop(nas, 'shutdownSeconds', wholeOrUndefined(value), DEFAULTS.shutdownSeconds);
-              changed();
-            }), 'How long Power stays off after a shutdown while DSM still answers.'),
-            field('Broadcast address', text(nas.broadcast, DEFAULTS.broadcast, (value) => {
-              setOrDrop(nas, 'broadcast', value.trim() || undefined, DEFAULTS.broadcast);
-              changed();
-            }), "Where the Wake-on-LAN packet goes; the network's own if the default does not reach the NAS."))),
+            field('Startup time (s)', number(nas.startupSeconds, String(DEFAULTS.startupSeconds), (value) => put(nas, 'startupSeconds', wholeOrUndefined(value), DEFAULTS.startupSeconds)), 'How long Power stays on after a wake before DSM must answer.'),
+            field('Shutdown time (s)', number(nas.shutdownSeconds, String(DEFAULTS.shutdownSeconds), (value) => put(nas, 'shutdownSeconds', wholeOrUndefined(value), DEFAULTS.shutdownSeconds)), 'How long Power stays off after a shutdown while DSM still answers.'),
+            field('Broadcast address', text(nas.broadcast, DEFAULTS.broadcast, (value) => put(nas, 'broadcast', value.trim() || undefined, DEFAULTS.broadcast)), "Where the Wake-on-LAN packet goes; the network's own if the default does not reach the NAS."))),
         el('div', { class: 'sm-section' },
           el('h6', {}, 'Accessories'),
           el('div', { class: 'sm-checks' }, checks)));
@@ -339,26 +333,17 @@
       return el('details', { class: 'sm-more sm-section mt-4', open: true },
         el('summary', {}, 'General'),
         el('div', { class: 'sm-grid' },
-          el('div', {},
-            check('sm-dashboard', 'Dashboard', config.dashboard === true, (on) => {
-              setOrDrop(config, 'dashboard', on, false);
-              changed();
-              showDashboardLink();
-            }),
-            el('div', { class: 'sm-help' }, 'A page with each NAS and its buttons, without login.'),
-            dashboardLink),
+          checkField('sm-dashboard', 'Dashboard', config.dashboard === true, (on) => {
+            put(config, 'dashboard', on, false);
+            showDashboardLink();
+          }, 'A page with each NAS and its buttons, without login.', dashboardLink),
           field('Dashboard port', number(config.dashboardPort, String(DEFAULTS.dashboardPort), (value) => {
-            setOrDrop(config, 'dashboardPort', wholeOrUndefined(value), DEFAULTS.dashboardPort);
-            changed();
+            put(config, 'dashboardPort', wholeOrUndefined(value), DEFAULTS.dashboardPort);
             showDashboardLink();
           }))),
         el('div', { class: 'sm-grid mt-3' },
-          el('div', {},
-            check('sm-controls', 'Buttons on the dashboard', config.dashboardControls !== false, (on) => {
-              setOrDrop(config, 'dashboardControls', on, true);
-              changed();
-            }),
-            el('div', { class: 'sm-help' }, 'Power on, Shut down and Restart; only for devices on the home network.')),
+          checkField('sm-controls', 'Buttons on the dashboard', config.dashboardControls !== false, (on) => put(config, 'dashboardControls', on, true),
+            'Power on, Shut down and Restart; only for devices on the home network.'),
           field('Poll every (s)', number(poll, String(DEFAULTS.pollSeconds), (value, input) => {
             const seconds = wholeOrUndefined(value);
             setOrDrop(config, 'pollSeconds', seconds, DEFAULTS.pollSeconds);

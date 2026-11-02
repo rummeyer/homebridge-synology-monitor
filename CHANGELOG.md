@@ -6,6 +6,20 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-11-02
+
+### Changed
+
+- Donations are by Buy Me a Coffee only: the README, the Homebridge UI's
+  Donate button and the repository's Sponsor button no longer list PayPal
+  and GitHub Sponsors.
+- The README shows the version on npm and how often it was downloaded.
+- Cleaner code without change to what it does: the Power and Restart
+  switches report a failure in one place, shutting down and restarting go
+  through DSM the same way, the sensors that turn inactive while the NAS is
+  away are listed once, and the settings page and the dashboard repeat
+  themselves less.
+
 ## [1.3.0] — 2026-10-24
 
 ### Changed

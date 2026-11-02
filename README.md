@@ -9,6 +9,8 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/homebridge-synology-monitor"><img src="https://img.shields.io/npm/v/homebridge-synology-monitor?label=npm" alt="npm"></a>
+  <a href="https://www.npmjs.com/package/homebridge-synology-monitor"><img src="https://img.shields.io/npm/dt/homebridge-synology-monitor" alt="Downloads"></a>
   <a href="https://github.com/rummeyer/homebridge-synology-monitor/actions/workflows/build.yml"><img src="https://github.com/rummeyer/homebridge-synology-monitor/actions/workflows/build.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/rummeyer/homebridge-synology-monitor/blob/main/LICENSE"><img src="https://img.shields.io/badge/licence-MIT-blue" alt="Licence"></a>
   <img src="https://img.shields.io/badge/homebridge-%E2%89%A5%202.0.0-purple" alt="Homebridge 2.0.0+">
@@ -18,8 +20,6 @@
 
 <p align="center">
   <a href="https://buymeacoffee.com/rummeyer"><img src="https://img.shields.io/badge/donate-Buy%20Me%20a%20Coffee-yellow" alt="Buy Me a Coffee"></a>
-  <a href="https://paypal.me/rummeyer"><img src="https://img.shields.io/badge/donate-PayPal-00457C" alt="PayPal"></a>
-  <a href="https://github.com/sponsors/rummeyer"><img src="https://img.shields.io/badge/sponsor-GitHub-ea4aaa" alt="GitHub Sponsors"></a>
 </p>
 
 ---
@@ -281,11 +281,9 @@ If the plugin is useful to you, you can support its development:
 
 <p>
   <a href="https://buymeacoffee.com/rummeyer"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buymeacoffee&logoColor=000" alt="Buy Me a Coffee"></a>
-  <a href="https://paypal.me/rummeyer"><img src="https://img.shields.io/badge/PayPal-00457C?logo=paypal&logoColor=fff" alt="PayPal"></a>
-  <a href="https://github.com/sponsors/rummeyer"><img src="https://img.shields.io/badge/GitHub%20Sponsors-ea4aaa?logo=githubsponsors&logoColor=fff" alt="GitHub Sponsors"></a>
 </p>
 
-The Homebridge UI shows the same links behind the plugin's **Donate** button.
+The Homebridge UI shows the same link behind the plugin's **Donate** button.
 
 ## Licence
 

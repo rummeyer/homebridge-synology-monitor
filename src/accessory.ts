@@ -26,6 +26,12 @@ interface Context {
 /** How long a momentary switch, or a fan someone tapped, takes to go back. */
 const BOUNCE_MS = 1000;
 
+/** The sensors that say they are not active while the NAS does not answer, beside the drives and volumes. */
+const LIVE_SENSORS = new Set(['temperature', 'storage', 'update']);
+
+/** Whether *subtype* is a drive's or a volume's service, which come and go with what DSM lists. */
+const isPart = (subtype: string | undefined): boolean => Boolean(subtype?.startsWith('disk:') || subtype?.startsWith('volume:'));
+
 export class NasAccessory {
   readonly #api: API;
   readonly #log: Logging;
@@ -60,9 +66,8 @@ export class NasAccessory {
       try {
         await (value ? this.#monitor.powerOn() : this.#monitor.powerOff());
       } catch (error) {
-        this.#log.error(`${this.#monitor.config.name}: ${(error as Error).message}`);
         this.#bounce(power, Characteristic.On, () => this.#monitor.isOn());
-        throw new this.#api.hap.HapStatusError(this.#api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+        this.#fail(error);
       }
     });
 
@@ -88,8 +93,7 @@ export class NasAccessory {
         try {
           await this.#monitor.restart();
         } catch (error) {
-          this.#log.error(`${this.#monitor.config.name}: ${(error as Error).message}`);
-          throw new this.#api.hap.HapStatusError(this.#api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+          this.#fail(error);
         }
       });
     }
@@ -115,8 +119,7 @@ export class NasAccessory {
       this.#service(Service.HumiditySensor, `volume:${volume.id}`, volume.name, true);
     }
     for (const service of [...this.#accessory.services]) {
-      const subtype = service.subtype ?? '';
-      if ((subtype.startsWith('disk:') || subtype.startsWith('volume:')) && !wanted.has(subtype)) {
+      if (isPart(service.subtype) && !wanted.has(service.subtype!)) {
         this.#accessory.removeService(service);
       }
     }
@@ -147,12 +150,8 @@ export class NasAccessory {
     this.#find(Service.Switch, 'power')?.updateCharacteristic(Characteristic.On, on);
     this.#find(Service.Switch, 'restart')?.updateCharacteristic(Characteristic.On, false);
 
-    const temperature = this.#find(Service.TemperatureSensor, 'temperature');
-    if (temperature) {
-      if (readings?.temperature !== undefined) {
-        temperature.updateCharacteristic(Characteristic.CurrentTemperature, readings.temperature);
-      }
-      temperature.updateCharacteristic(Characteristic.StatusActive, live);
+    if (readings?.temperature !== undefined) {
+      this.#find(Service.TemperatureSensor, 'temperature')?.updateCharacteristic(Characteristic.CurrentTemperature, readings.temperature);
     }
     for (const subtype of ['cpu', 'memory'] as const) {
       const fan = this.#find(Service.Fanv2, subtype);
@@ -162,23 +161,14 @@ export class NasAccessory {
         fan.updateCharacteristic(Characteristic.RotationSpeed, speed);
       }
     }
-    const storage = this.#find(Service.LeakSensor, 'storage');
-    if (storage) {
-      const trouble = Boolean(readings?.problems.length);
-      storage.updateCharacteristic(
-        Characteristic.LeakDetected,
-        trouble ? Characteristic.LeakDetected.LEAK_DETECTED : Characteristic.LeakDetected.LEAK_NOT_DETECTED,
-      );
-      storage.updateCharacteristic(Characteristic.StatusActive, live);
-    }
-    const update = this.#find(Service.OccupancySensor, 'update');
-    if (update) {
-      update.updateCharacteristic(
-        Characteristic.OccupancyDetected,
-        monitor.updateAvailable ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED,
-      );
-      update.updateCharacteristic(Characteristic.StatusActive, live);
-    }
+    this.#find(Service.LeakSensor, 'storage')?.updateCharacteristic(
+      Characteristic.LeakDetected,
+      readings?.problems.length ? Characteristic.LeakDetected.LEAK_DETECTED : Characteristic.LeakDetected.LEAK_NOT_DETECTED,
+    );
+    this.#find(Service.OccupancySensor, 'update')?.updateCharacteristic(
+      Characteristic.OccupancyDetected,
+      monitor.updateAvailable ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED,
+    );
     for (const disk of readings?.disks ?? []) {
       const service = this.#find(Service.TemperatureSensor, `disk:${disk.id}`);
       if (service && disk.temperature !== undefined) {
@@ -189,7 +179,7 @@ export class NasAccessory {
       this.#find(Service.HumiditySensor, `volume:${volume.id}`)?.updateCharacteristic(Characteristic.CurrentRelativeHumidity, volume.usedPercent);
     }
     for (const service of this.#accessory.services) {
-      if (service.subtype?.startsWith('disk:') || service.subtype?.startsWith('volume:')) {
+      if (LIVE_SENSORS.has(service.subtype ?? '') || isPart(service.subtype)) {
         service.updateCharacteristic(Characteristic.StatusActive, live);
       }
     }
@@ -236,6 +226,12 @@ export class NasAccessory {
     }
     service.setCharacteristic(Characteristic.ConfiguredName, name);
     return service;
+  }
+
+  /** Logs why the NAS did not do what HomeKit asked, and tells HomeKit it failed. */
+  #fail(error: unknown): never {
+    this.#log.error(`${this.#monitor.config.name}: ${(error as Error).message}`);
+    throw new this.#api.hap.HapStatusError(this.#api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
   }
 
   /** Puts a characteristic someone changed back to what it shows, a moment later. */

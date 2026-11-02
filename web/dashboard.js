@@ -24,6 +24,10 @@
     days: 'd', hours: 'h', minutes: 'min',
   };
 
+  /** What a button says once armed, and what its message says once done. */
+  const CONFIRM = { wake: T.confirmWake, shutdown: T.confirmShutdown, restart: T.confirmRestart };
+  const SENT = { wake: T.sentWake, shutdown: T.sentShutdown, restart: T.sentRestart };
+
   const ICONS = {
     power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
     temperature: '<path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/>',
@@ -41,6 +45,11 @@
   /** What the last press of each NAS's buttons answered: index → { text, error }. */
   const messages = new Map();
   let last = null;
+
+  /** Whether the button for *key*, "index/action", is waiting for its second press. */
+  function isArmed(key) {
+    return (armed.get(key) || 0) > Date.now();
+  }
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -165,10 +174,8 @@
       const actions = el('div', 'actions');
       const can = { wake: nas.canWake && (nas.power === 'off' || nas.power === 'stopping'), shutdown: on, restart: on };
       for (const action of ['wake', 'shutdown', 'restart']) {
-        const key = `${index}/${action}`;
-        const isArmed = (armed.get(key) || 0) > Date.now();
-        const confirm = { wake: T.confirmWake, shutdown: T.confirmShutdown, restart: T.confirmRestart }[action];
-        const button = el('button', isArmed ? 'armed' : '', isArmed ? confirm : T[action]);
+        const ready = isArmed(`${index}/${action}`);
+        const button = el('button', ready ? 'armed' : '', ready ? CONFIRM[action] : T[action]);
         button.type = 'button';
         button.disabled = !can[action];
         if (action === 'wake' && !nas.canWake) {
@@ -195,7 +202,7 @@
   /** First press arms the button; a second within a few seconds does it. */
   async function press(index, action) {
     const key = `${index}/${action}`;
-    if ((armed.get(key) || 0) <= Date.now()) {
+    if (!isArmed(key)) {
       armed.clear();
       armed.set(key, Date.now() + ARM_MS);
       draw();
@@ -213,7 +220,7 @@
       if (!response.ok) {
         throw new Error(answer.error || `HTTP ${response.status}`);
       }
-      messages.set(index, { text: { wake: T.sentWake, shutdown: T.sentShutdown, restart: T.sentRestart }[action] });
+      messages.set(index, { text: SENT[action] });
     } catch (error) {
       messages.set(index, { text: error.message, error: true });
     }

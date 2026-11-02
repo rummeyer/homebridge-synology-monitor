@@ -124,11 +124,7 @@ export class NasMonitor extends EventEmitter<{ update: [] }> {
     if (!this.power.reachable) {
       throw new Error(`${this.config.name} does not answer yet, so it cannot be shut down`);
     }
-    await this.#dsm.call('SYNO.Core.System', 1, 'shutdown');
-    this.#log.info(`${this.config.name}: shutting down`);
-    this.#dsm.forget();
-    this.power.expect('stopping', this.config.shutdownSeconds, this.#now());
-    this.emit('update');
+    await this.#system('shutdown', 'shutting down', 'stopping', this.config.shutdownSeconds);
   }
 
   /** Restarts the NAS through DSM. */
@@ -136,10 +132,15 @@ export class NasMonitor extends EventEmitter<{ update: [] }> {
     if (!this.power.reachable) {
       throw new Error(`${this.config.name} does not answer, so it cannot be restarted`);
     }
-    await this.#dsm.call('SYNO.Core.System', 1, 'reboot');
-    this.#log.info(`${this.config.name}: restarting`);
+    await this.#system('reboot', 'restarting', 'restarting', this.config.shutdownSeconds + this.config.startupSeconds);
+  }
+
+  /** Has DSM shut down or restart the NAS, whose session ends with it, and waits *seconds* for it to get there. */
+  async #system(method: 'shutdown' | 'reboot', doing: string, state: 'stopping' | 'restarting', seconds: number): Promise<void> {
+    await this.#dsm.call('SYNO.Core.System', 1, method);
+    this.#log.info(`${this.config.name}: ${doing}`);
     this.#dsm.forget();
-    this.power.expect('restarting', this.config.shutdownSeconds + this.config.startupSeconds, this.#now());
+    this.power.expect(state, seconds, this.#now());
     this.emit('update');
   }
 
