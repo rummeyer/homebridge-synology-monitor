@@ -6,6 +6,13 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.1] — 2026-11-02
+
+### Changed
+
+- The README's screenshots show the settings page and the dashboards as they
+  are now, the settings page light and dark.
+
 ## [1.4.0] — 2026-11-02
 
 ### Changed
