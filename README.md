@@ -159,7 +159,10 @@ and fill in the host, the account and the MAC address. Save, and restart the
 child bridge.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rummeyer/homebridge-synology-monitor/main/docs/settings.png" alt="The plugin's settings: a NAS picked from a list with Add and Delete, its name, host, protocol and port, the DSM account, the power settings with the MAC address, the accessories as tick boxes, and General with the Dashboard switch, its link and its port" width="560">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/rummeyer/homebridge-synology-monitor/main/docs/settings-dark.png">
+    <img src="https://raw.githubusercontent.com/rummeyer/homebridge-synology-monitor/main/docs/settings-light.png" alt="The plugin's settings: a NAS picked from a list with Add and Delete, its name, host, protocol and port, the DSM account, the power settings with the MAC address, the accessories as tick boxes, and General with the Dashboard switch, its link, its port, the buttons on the dashboard and how often each NAS is asked" width="560">
+  </picture>
 </p>
 
 **4. The Home app.** Add the child bridge with its code or QR code from the
