@@ -3,7 +3,7 @@
  * packet broadcast to UDP port 9, and a TCP connection to DSM's port.
  */
 import { createSocket } from 'node:dgram';
-import { connect } from 'node:net';
+import { connect, isIP } from 'node:net';
 
 /** Six bytes 0xFF, then the MAC sixteen times. */
 export function magicPacket(mac: string): Buffer {
@@ -69,4 +69,24 @@ export function isLocalAddress(address: string | undefined): boolean {
   }
   const lower = ip.toLowerCase();
   return lower === '::1' || /^f[cd][0-9a-f]{2}:/.test(lower) || /^fe[89ab][0-9a-f]:/.test(lower);
+}
+
+/** Name endings that only resolve on the home network. */
+const HOME_SUFFIXES = ['.local', '.lan', '.home', '.home.arpa', '.internal', '.localdomain', '.fritz.box'];
+
+/**
+ * Whether a request's `Host` header names this machine as the home network
+ * does: an IP address, `localhost`, a name without a dot, or one ending as a
+ * home network's names do. A web page using DNS rebinding reaches the
+ * dashboard under its own name, which none of these is.
+ */
+export function isLocalHost(host: string | undefined): boolean {
+  if (!host) {
+    return false;
+  }
+  const name = (host.startsWith('[') ? host.slice(1, host.indexOf(']')) : host.replace(/:\d*$/, '')).toLowerCase().replace(/\.$/, '');
+  if (isIP(name)) {
+    return true;
+  }
+  return name === 'localhost' || /^[a-z0-9-]+$/.test(name) || HOME_SUFFIXES.some((suffix) => name.endsWith(suffix));
 }

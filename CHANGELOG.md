@@ -6,6 +6,15 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The dashboard's buttons also check the `Host` header: they answer only when
+  the page was opened by the machine's address, `localhost`, a name without
+  a dot or a home network name (`.local`, `.lan`, `.home`, `.home.arpa`,
+  `.internal`, `.localdomain`, `.fritz.box`), so a website cannot press them
+  by DNS rebinding. As suggested in the verification.
+- The README shows the *Verified by Homebridge* badge.
+
 ## [1.4.1] — 2026-11-02
 
 ### Changed

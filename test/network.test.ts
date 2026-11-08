@@ -4,7 +4,7 @@ import { createServer } from 'node:net';
 import type { AddressInfo } from 'node:net';
 import test from 'node:test';
 
-import { isLocalAddress, magicPacket, reachable } from '../src/network.ts';
+import { isLocalAddress, isLocalHost, magicPacket, reachable } from '../src/network.ts';
 
 test('a magic packet is six 0xFF and the MAC sixteen times', () => {
   const packet = magicPacket('00:11:32:ab:cd:ef');
@@ -44,5 +44,14 @@ test('only the home network may press the buttons, as with nas-control', () => {
   }
   for (const address of ['8.8.8.8', '172.32.0.1', '192.169.0.1', '2001:4860::8888', '::ffff:8.8.8.8', '', undefined]) {
     assert.equal(isLocalAddress(address), false, String(address));
+  }
+});
+
+test('the buttons answer the machine by its address or home network name, not a web page by DNS rebinding', () => {
+  for (const host of ['10.0.1.66:8583', '10.0.1.66', '[fe80::1]:8583', '[::1]', 'localhost:8583', 'raspberrypi:8583', 'pi.local:8583', 'nas.fritz.box', 'homebridge.home.arpa:8583', 'PI.LAN.']) {
+    assert.equal(isLocalHost(host), true, host);
+  }
+  for (const host of ['evil.example.com:8583', 'rebind.network', 'local.example.com', 'fritz.box.example.com', '', undefined]) {
+    assert.equal(isLocalHost(host), false, String(host));
   }
 });

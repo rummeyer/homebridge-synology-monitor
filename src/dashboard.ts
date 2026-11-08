@@ -5,7 +5,8 @@
  *
  * The buttons are the only thing that changes anything, and they answer only
  * POSTs from a private, link-local or loopback address, as nas-control lets
- * in. They also want a JSON body: a form on another website can only send
+ * in, sent to the address or a home network name of this machine, so not
+ * to a web page's own name pointed here by DNS rebinding. They also want a JSON body: a form on another website can only send
  * one after a CORS preflight, which this server never answers, so a page
  * opened elsewhere in the same browser cannot press them.
  */
@@ -14,7 +15,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { NasMonitor, NasSnapshot } from './monitor.ts';
-import { isLocalAddress } from './network.ts';
+import { isLocalAddress, isLocalHost } from './network.ts';
 
 export interface DashboardSource {
   monitors(): NasMonitor[];
@@ -112,7 +113,7 @@ export class Dashboard {
     }
   }
 
-  /** `POST /nas/<index>/<wake|shutdown|restart>` with a JSON body, from the home network. */
+  /** `POST /nas/<index>/<wake|shutdown|restart>` with a JSON body, from the home network and to it. */
   async #act(request: IncomingMessage, response: ServerResponse, path: string): Promise<void> {
     request.resume();
     const match = /^\/nas\/(\d+)\/(wake|shutdown|restart)$/.exec(path);
@@ -125,7 +126,7 @@ export class Dashboard {
       json(response, 403, { error: 'The buttons are switched off in the settings' });
       return;
     }
-    if (!isLocalAddress(request.socket.remoteAddress)) {
+    if (!isLocalAddress(request.socket.remoteAddress) || !isLocalHost(request.headers.host)) {
       json(response, 403, { error: 'Only from the home network' });
       return;
     }

@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/homebridge/homebridge/wiki/Verified-Plugins"><img src="https://img.shields.io/badge/_-verified-blueviolet?color=%23491F59&style=flat&logoColor=%23FFFFFF&logo=homebridge" alt="Verified by Homebridge"></a>
   <a href="https://www.npmjs.com/package/homebridge-synology-monitor"><img src="https://img.shields.io/npm/v/homebridge-synology-monitor?label=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/homebridge-synology-monitor"><img src="https://img.shields.io/npm/dt/homebridge-synology-monitor" alt="Downloads"></a>
   <a href="https://github.com/rummeyer/homebridge-synology-monitor/actions/workflows/build.yml"><img src="https://github.com/rummeyer/homebridge-synology-monitor/actions/workflows/build.yml/badge.svg" alt="CI"></a>
@@ -116,7 +117,10 @@ the Homebridge UI itself is usually on 8581.
 **Who can press the buttons:** the page has no login. The buttons answer only
 devices on the home network — private, link-local and loopback addresses —
 and only the page's own script: another website open in the same browser
-cannot press them. Still, anyone on your network can, so do not forward the
+cannot press them. They also want the page opened by the machine's address,
+`localhost`, a name without a dot or a home network name such as
+`pi.local`, `pi.fritz.box` or `pi.home.arpa`, so a website cannot reach them
+by DNS rebinding. Still, anyone on your network can, so do not forward the
 port to the internet. Untick **Buttons on the dashboard** for a page that
 only shows.
 

@@ -65,6 +65,12 @@ test('a button press wants JSON, so a form on another site cannot press it', asy
   assert.equal(dsm.calls.some((call) => call.method === 'shutdown'), false);
 });
 
+test('a press sent to another name, as by DNS rebinding, is refused', async () => {
+  const rebound = await ask('POST', '/nas/0/shutdown', '{}', { 'Content-Type': 'application/json', Host: 'evil.example.com:8583' });
+  assert.equal(rebound.status, 403);
+  assert.equal(dsm.calls.some((call) => call.method === 'shutdown'), false);
+});
+
 test('an unknown NAS or action is not found', async () => {
   assert.equal((await post('/nas/5/shutdown')).status, 404);
   assert.equal((await post('/nas/0/format')).status, 404);
