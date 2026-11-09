@@ -6,6 +6,14 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.3] — 2026-11-09
+
+### Documentation
+
+- The README tells of the other monitors in the family, and of Monitor
+  Dashboard, which shows them all on one page.
+- The npm package of 1.4.2 had an empty CHANGELOG; it is back.
+
 ## [1.4.2] — 2026-11-08
 
 ### Changed
