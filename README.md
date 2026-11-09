@@ -51,6 +51,7 @@ look of Apple's Home app, with buttons to power on, shut down and restart.
 - [How it works](#how-it-works)
 - [Coming from homebridge-synology or nas-control](#coming-from-homebridge-synology-or-nas-control)
 - [Troubleshooting](#troubleshooting)
+- [More monitors](#more-monitors)
 - [Support](#support)
 - [Licence](#licence)
 
@@ -278,6 +279,24 @@ Homebridge machine cannot reach it. The Power switch says which.
 **The dashboard does not open**: is **Dashboard** ticked, and the child
 bridge restarted since? The log says `Dashboard on port 8583` when it is up,
 or why the port could not be used.
+
+## More monitors
+
+This plugin is one of a family of three Homebridge monitors, each with a
+dashboard in the same Home look:
+
+- [**Appliance Monitor**](https://github.com/rummeyer/homebridge-appliance-monitor)
+  — a washing machine, dryer or coffee machine on a smart plug in the Home
+  app: Running or done, from its power draw, learned from one cycle, and
+  what it is doing in between: heating, spinning, a coffee being drawn.
+- [**Connection Monitor**](https://github.com/rummeyer/homebridge-connection-monitor)
+  — whether the router, the internet, a phone or anything else on the
+  network answers, as an occupancy sensor, switch or outlet, and how fast:
+  Smokeping on a dashboard.
+
+[**Monitor Dashboard**](https://github.com/rummeyer/monitor-dashboard) puts
+the dashboards of all three on one page, a tab each — one address for
+everything, served by Caddy on the home network.
 
 ## Support
 
