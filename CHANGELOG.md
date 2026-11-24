@@ -6,6 +6,8 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.4] — 2026-11-24
+
 ### Fixed
 
 - Dashboard: in Safari the Home look's backdrop covered part of the window
