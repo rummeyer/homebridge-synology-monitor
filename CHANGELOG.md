@@ -6,6 +6,13 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Dashboard: in Safari the Home look's backdrop covered part of the window
+  only, white beside and beneath it — the page's zoom, a fifth smaller, is now
+  on the content rather than the root, and the page paints its own ground
+  under all.
+
 ## [1.4.3] — 2026-11-09
 
 ### Documentation
