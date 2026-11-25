@@ -6,6 +6,14 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Update available** no longer stays on after the update is installed. DSM
+  was asked every six hours only; installing restarts the NAS, and the answer
+  from before it was shown for up to six hours after (25.11.2026: Update 2
+  installed at 9:55, still shown at 11:10). It is asked again once the NAS
+  answers after being off or restarting, and when its DSM version changes.
+
 ## [1.4.4] — 2026-11-24
 
 ### Fixed

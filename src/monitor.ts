@@ -51,7 +51,12 @@ export class NasMonitor extends EventEmitter<{ update: [] }> {
   readonly #now: () => number;
   #timer: NodeJS.Timeout | undefined;
   #polling: Promise<void> | undefined;
-  /** When DSM was last asked for an update; never yet means at the first reading. */
+  /**
+   * When DSM was last asked for an update; never yet means at the next reading. Forgotten when
+   * the NAS stops answering, as it does to install one, and when its version changes: an update
+   * waiting before is installed then (25.11.2026: Update 2 installed, the reboot over in two
+   * minutes, and *update available* shown for six hours after it).
+   */
   #lastUpdateCheck: number | undefined;
   /** What was last logged about whether it answers, so each change is logged once. */
   #wasReachable: boolean | undefined;
@@ -158,6 +163,7 @@ export class NasMonitor extends EventEmitter<{ update: [] }> {
     } else {
       this.#dsm.forget();
       this.error = undefined;
+      this.#lastUpdateCheck = undefined;
     }
     this.emit('update');
   }
@@ -171,6 +177,7 @@ export class NasMonitor extends EventEmitter<{ update: [] }> {
         await this.#dsm.call('SYNO.Core.System.Status', 1, 'get'),
       ];
       const stored = readStorage(storage);
+      const before = this.readings?.version;
       this.readings = {
         ...readInfo(info),
         ...readUtilization(utilization),
@@ -178,7 +185,8 @@ export class NasMonitor extends EventEmitter<{ update: [] }> {
         problems: [...readStatus(status), ...stored.problems],
         at: this.#now(),
       };
-      if (this.#lastUpdateCheck === undefined || this.#now() - this.#lastUpdateCheck >= UPDATE_CHECK_MS) {
+      const updated = before !== undefined && this.readings.version !== before;
+      if (updated || this.#lastUpdateCheck === undefined || this.#now() - this.#lastUpdateCheck >= UPDATE_CHECK_MS) {
         this.updateAvailable = readUpdate(await this.#dsm.call('SYNO.Core.Upgrade.Server', 1, 'check'));
         this.#lastUpdateCheck = this.#now();
       }

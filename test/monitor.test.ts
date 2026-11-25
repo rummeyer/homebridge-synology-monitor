@@ -57,6 +57,33 @@ test('the update check runs only every few hours', async () => {
   assert.equal(monitor.updateAvailable, true);
 });
 
+test('an update shown is checked again once the NAS has been off, as it is to install it', async () => {
+  const { monitor, dsm, net, clock } = setUp();
+  dsm.data['SYNO.Core.Upgrade.Server.check'] = { available: true };
+  await monitor.poll();
+  assert.equal(monitor.updateAvailable, true);
+  // Installed: the NAS restarts, two minutes later it answers again with nothing waiting.
+  dsm.data['SYNO.Core.Upgrade.Server.check'] = { available: false };
+  net.up = false;
+  clock.now += 60_000;
+  await monitor.poll();
+  net.up = true;
+  clock.now += 60_000;
+  await monitor.poll();
+  assert.equal(monitor.updateAvailable, false);
+});
+
+test('an update shown is checked again when the DSM version changes', async () => {
+  const { monitor, dsm, clock } = setUp();
+  dsm.data['SYNO.Core.Upgrade.Server.check'] = { available: true };
+  await monitor.poll();
+  dsm.data['SYNO.Core.Upgrade.Server.check'] = { available: false };
+  dsm.data['SYNO.DSM.Info.getinfo'] = { ...(dsm.data['SYNO.DSM.Info.getinfo'] as object), version_string: 'DSM 7.4.1-90080 Update 2' };
+  clock.now += 60_000;
+  await monitor.poll();
+  assert.equal(monitor.updateAvailable, false);
+});
+
 test('a NAS that is off keeps its last readings, and the change is logged once', async () => {
   const { monitor, net, log } = setUp();
   await monitor.poll();
