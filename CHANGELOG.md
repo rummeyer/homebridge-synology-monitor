@@ -6,6 +6,8 @@ adheres to [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.5] — 2026-11-25
+
 ### Fixed
 
 - **Update available** no longer stays on after the update is installed. DSM
